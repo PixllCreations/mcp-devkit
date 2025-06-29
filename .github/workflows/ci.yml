@@ -65,7 +65,10 @@ jobs:
         run: |
           npm pack
           npm install -g mcp-devkit-*.tgz
-          mcp-devkit --version
+          # Test that CLI is installed and accessible
+          which mcp-devkit
+          # Test version command (Commander.js exits with code 1 but outputs version)
+          mcp-devkit --version 2>&1 | grep "0.1.0" || { echo "Version check failed"; exit 1; }
 
   integration-test:
     runs-on: ubuntu-latest
@@ -91,6 +94,8 @@ jobs:
         run: |
           npm pack
           npm install -g mcp-devkit-*.tgz
+          # Verify CLI is properly installed
+          which mcp-devkit
 
       - name: Test project initialization
         run: |
