@@ -1,9 +1,9 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
-import { 
+import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
-  ListResourcesRequestSchema 
+  ListResourcesRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
 import fs from 'fs/promises';
 import path from 'path';
@@ -79,7 +79,7 @@ describe('MCP Server Integration Tests', () => {
 
       // Simulate a list tools request
       const result = await mockHandler({});
-      
+
       expect(result.tools).toHaveLength(2);
       expect(result.tools[0].name).toBe('mcp_init_guided');
       expect(result.tools[1].name).toBe('mcp_get_status');
@@ -110,7 +110,7 @@ describe('MCP Server Integration Tests', () => {
 
       // Simulate a list resources request
       const result = await mockHandler({});
-      
+
       expect(result.resources).toHaveLength(2);
       expect(result.resources[0].uri).toBe('project://status');
       expect(result.resources[1].uri).toBe('project://architecture');
@@ -125,7 +125,7 @@ describe('MCP Server Integration Tests', () => {
           // Simulate project initialization
           const projectPath = request.params.arguments.projectPath;
           const mcpPath = path.join(projectPath, '.mcp');
-          
+
           await fs.mkdir(mcpPath, { recursive: true });
           await fs.writeFile(
             path.join(mcpPath, 'metadata.json'),
@@ -137,14 +137,16 @@ describe('MCP Server Integration Tests', () => {
           );
 
           return {
-            content: [{
-              type: 'text',
-              text: JSON.stringify({
-                success: true,
-                message: 'Project initialized',
-                projectInitialized: true,
-              }),
-            }],
+            content: [
+              {
+                type: 'text',
+                text: JSON.stringify({
+                  success: true,
+                  message: 'Project initialized',
+                  projectInitialized: true,
+                }),
+              },
+            ],
           };
         }
       });
@@ -164,11 +166,12 @@ describe('MCP Server Integration Tests', () => {
       });
 
       expect(result.content[0].text).toContain('"success":true');
-      
+
       // Verify project was created
-      const metadataExists = await fs.access(
-        path.join(testProjectDir, '.mcp', 'metadata.json')
-      ).then(() => true).catch(() => false);
+      const metadataExists = await fs
+        .access(path.join(testProjectDir, '.mcp', 'metadata.json'))
+        .then(() => true)
+        .catch(() => false);
       expect(metadataExists).toBe(true);
     });
   });
@@ -178,7 +181,7 @@ describe('MCP Server Integration Tests', () => {
       // First create a project
       const mcpPath = path.join(testProjectDir, '.mcp');
       await fs.mkdir(mcpPath, { recursive: true });
-      
+
       await fs.writeFile(
         path.join(mcpPath, 'metadata.json'),
         JSON.stringify({
@@ -196,16 +199,18 @@ describe('MCP Server Integration Tests', () => {
       const mockHandler = vi.fn().mockImplementation(async (request) => {
         if (request.params.name === 'mcp_get_status') {
           return {
-            content: [{
-              type: 'text',
-              text: JSON.stringify({
-                currentPhase: 'planning',
-                progress: '33%',
-                completedTasks: ['Task 1'],
-                currentTask: 'Task 2',
-                nextSteps: ['Task 3'],
-              }),
-            }],
+            content: [
+              {
+                type: 'text',
+                text: JSON.stringify({
+                  currentPhase: 'planning',
+                  progress: '33%',
+                  completedTasks: ['Task 1'],
+                  currentTask: 'Task 2',
+                  nextSteps: ['Task 3'],
+                }),
+              },
+            ],
           };
         }
       });
@@ -235,23 +240,25 @@ describe('MCP Server Integration Tests', () => {
       const mockHandler = vi.fn().mockImplementation(async (request) => {
         if (request.params.name === 'mcp_check_drift') {
           const { currentDiscussion } = request.params.arguments;
-          
+
           const isDrifting = currentDiscussion.toLowerCase().includes('framework');
-          
+
           return {
-            content: [{
-              type: 'text',
-              text: JSON.stringify({
-                isDrifting,
-                driftType: isDrifting ? 'technology-selection' : undefined,
-                recommendation: isDrifting 
-                  ? 'Technology choices should be made in architecture phase'
-                  : 'Discussion appears to be on track',
-                suggestedAction: isDrifting
-                  ? 'Return to current implementation task'
-                  : 'Continue with current focus',
-              }),
-            }],
+            content: [
+              {
+                type: 'text',
+                text: JSON.stringify({
+                  isDrifting,
+                  driftType: isDrifting ? 'technology-selection' : undefined,
+                  recommendation: isDrifting
+                    ? 'Technology choices should be made in architecture phase'
+                    : 'Discussion appears to be on track',
+                  suggestedAction: isDrifting
+                    ? 'Return to current implementation task'
+                    : 'Continue with current focus',
+                }),
+              },
+            ],
           };
         }
       });

@@ -46,7 +46,7 @@ describe('CLI Integration Tests', () => {
       } catch (error: any) {
         // Commander.js exits with status 1, but stdout contains the help
         expect(error.stdout).toContain('mcp-devkit');
-        expect(error.stdout).toContain('Claude\'s Persistent Development Partner');
+        expect(error.stdout).toContain("Claude's Persistent Development Partner");
         expect(error.stdout).toContain('Commands:');
         expect(error.stdout).toContain('init');
       }
@@ -59,17 +59,17 @@ describe('CLI Integration Tests', () => {
       await fs.mkdir(testProjectDir, { recursive: true });
 
       // Run init command
-      const output = execSync(
-        `npx tsx ${cliPath} init ${testProjectDir}`,
-        { encoding: 'utf-8' }
-      );
+      const output = execSync(`npx tsx ${cliPath} init ${testProjectDir}`, { encoding: 'utf-8' });
 
       // Check output - CLI shows detailed project structure output
       expect(output).toContain('📁 Project Structure Created');
 
       // Check that .mcp directory was created
       const mcpDir = path.join(testProjectDir, '.mcp');
-      const mcpExists = await fs.access(mcpDir).then(() => true).catch(() => false);
+      const mcpExists = await fs
+        .access(mcpDir)
+        .then(() => true)
+        .catch(() => false);
       expect(mcpExists).toBe(true);
 
       // Check that all required files exist
@@ -82,7 +82,10 @@ describe('CLI Integration Tests', () => {
 
       for (const file of requiredFiles) {
         const filePath = path.join(mcpDir, file);
-        const fileExists = await fs.access(filePath).then(() => true).catch(() => false);
+        const fileExists = await fs
+          .access(filePath)
+          .then(() => true)
+          .catch(() => false);
         expect(fileExists, `File ${file} should exist`).toBe(true);
       }
 
@@ -107,10 +110,9 @@ describe('CLI Integration Tests', () => {
       // The CLI outputs progress to stderr, so we need to capture both stdout and stderr
       let output = '';
       try {
-        output = execSync(
-          `npx tsx ${cliPath} init ${testProjectDir} --force 2>&1`,
-          { encoding: 'utf-8' }
-        );
+        output = execSync(`npx tsx ${cliPath} init ${testProjectDir} --force 2>&1`, {
+          encoding: 'utf-8',
+        });
       } catch (error: any) {
         output = error.stdout + error.stderr;
       }
@@ -119,13 +121,15 @@ describe('CLI Integration Tests', () => {
       expect(output).toContain('📁 Project Structure Created');
 
       // Check that old file is gone
-      const oldFileExists = await fs.access(path.join(mcpDir, 'existing.txt'))
+      const oldFileExists = await fs
+        .access(path.join(mcpDir, 'existing.txt'))
         .then(() => true)
         .catch(() => false);
       expect(oldFileExists).toBe(false);
 
       // Check that new files exist
-      const prdExists = await fs.access(path.join(mcpDir, 'context_prd.md'))
+      const prdExists = await fs
+        .access(path.join(mcpDir, 'context_prd.md'))
         .then(() => true)
         .catch(() => false);
       expect(prdExists).toBe(true);
@@ -138,10 +142,7 @@ describe('CLI Integration Tests', () => {
       await fs.mkdir(mcpDir, { recursive: true });
 
       // Run init command without --force
-      const output = execSync(
-        `npx tsx ${cliPath} init ${testProjectDir}`,
-        { encoding: 'utf-8' }
-      );
+      const output = execSync(`npx tsx ${cliPath} init ${testProjectDir}`, { encoding: 'utf-8' });
 
       expect(output).toContain('Use --force to overwrite existing .mcp directory');
     });
@@ -149,19 +150,17 @@ describe('CLI Integration Tests', () => {
     it('should create project in current directory with . argument', async () => {
       const currentDir = process.cwd();
       const testDir = path.join(currentDir, 'test-current-dir');
-      
+
       await fs.mkdir(testDir, { recursive: true });
-      
+
       // Change to test directory and run init with .
-      const output = execSync(
-        `cd ${testDir} && npx tsx ${cliPath} init .`,
-        { encoding: 'utf-8' }
-      );
+      const output = execSync(`cd ${testDir} && npx tsx ${cliPath} init .`, { encoding: 'utf-8' });
 
       expect(output).toContain('📁 Project Structure Created');
 
       // Check that .mcp was created in the test directory
-      const mcpExists = await fs.access(path.join(testDir, '.mcp'))
+      const mcpExists = await fs
+        .access(path.join(testDir, '.mcp'))
         .then(() => true)
         .catch(() => false);
       expect(mcpExists).toBe(true);
@@ -171,20 +170,14 @@ describe('CLI Integration Tests', () => {
     });
 
     it('should display beautiful ASCII art banner', () => {
-      const output = execSync(
-        `npx tsx ${cliPath} init ${testProjectDir}`,
-        { encoding: 'utf-8' }
-      );
+      const output = execSync(`npx tsx ${cliPath} init ${testProjectDir}`, { encoding: 'utf-8' });
 
       expect(output).toContain('███╗   ███╗ ██████╗██████╗');
-      expect(output).toContain('Claude\'s Persistent Development Partner');
+      expect(output).toContain("Claude's Persistent Development Partner");
     });
 
     it('should show next steps after initialization', () => {
-      const output = execSync(
-        `npx tsx ${cliPath} init ${testProjectDir}`,
-        { encoding: 'utf-8' }
-      );
+      const output = execSync(`npx tsx ${cliPath} init ${testProjectDir}`, { encoding: 'utf-8' });
 
       expect(output).toContain('🚀 Next Steps:');
       expect(output).toContain('Review Templates');
