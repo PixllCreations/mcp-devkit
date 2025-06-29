@@ -1,6 +1,7 @@
 {
   "name": "mcp-devkit",
   "version": "0.1.0",
+  "type": "module",
   "description": "Claude's Persistent Development Partner - An MCP server that prevents context drift and maintains project memory",
   "main": "dist/cli/index.js",
   "bin": {
