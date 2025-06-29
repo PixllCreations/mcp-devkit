@@ -59,17 +59,4 @@ program.on('command:*', () => {
 });
 
 // Parse arguments and execute
-try {
-  program.parse();
-} catch (error) {
-  console.error('\n' + chalk.red('✖ Unexpected error:'));
-  console.error(chalk.gray('  '), error instanceof Error ? error.message : String(error));
-  
-  if (program.opts()['verbose'] && error instanceof Error && error.stack) {
-    console.error(chalk.dim('\nStack trace:'));
-    console.error(chalk.dim(error.stack));
-  }
-  
-  console.error(chalk.dim('\nPlease report this issue: https://github.com/escott/mcp-devkit/issues\n'));
-  process.exit(1);
-}
+program.parse();
