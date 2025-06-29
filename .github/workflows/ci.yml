@@ -1,0 +1,108 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18, 20]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run linting
+        run: npm run lint
+
+      - name: Run type checking
+        run: npm run build
+
+      - name: Run tests
+        run: npm run test:coverage
+
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+  build:
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build project
+        run: npm run build
+
+      - name: Test CLI installation
+        run: |
+          npm pack
+          npm install -g mcp-devkit-*.tgz
+          # Test that CLI is installed and accessible
+          which mcp-devkit
+          # Test version command (Commander.js exits with code 1 but outputs version)
+          mcp-devkit --version 2>&1 | grep "0.1.0" || { echo "Version check failed"; exit 1; }
+
+  integration-test:
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build project
+        run: npm run build
+
+      - name: Install CLI globally
+        run: |
+          npm pack
+          npm install -g mcp-devkit-*.tgz
+          # Verify CLI is properly installed
+          which mcp-devkit
+
+      - name: Test project initialization
+        run: |
+          mkdir test-project
+          cd test-project
+          mcp-devkit init .
+          ls -la .mcp/
+          test -f .mcp/context_prd.md
+          test -f .mcp/context_architecture.md
+          test -f .mcp/context_tasklist.md
