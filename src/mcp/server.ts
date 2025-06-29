@@ -110,16 +110,27 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
   switch (name) {
     case 'mcp_init_guided':
-      return await initTool.execute(args);
+      return await initTool.execute({
+        projectPath: (args as any)?.projectPath || process.cwd(),
+        projectType: (args as any)?.projectType || 'default',
+        requirements: (args as any)?.requirements || ''
+      });
     
     case 'mcp_get_status':
-      return await statusTool.execute(args);
+      return await statusTool.execute({
+        projectPath: (args as any)?.projectPath || process.cwd()
+      });
     
     case 'mcp_next_task':
-      return await statusTool.getNextTask(args);
+      return await statusTool.getNextTask({
+        projectPath: (args as any)?.projectPath || process.cwd()
+      });
     
     case 'mcp_check_drift':
-      return await statusTool.checkDrift(args);
+      return await statusTool.checkDrift({
+        currentDiscussion: (args as any)?.currentDiscussion || '',
+        sessionLength: (args as any)?.sessionLength || 0
+      });
     
     default:
       throw new Error(`Unknown tool: ${name}`);
@@ -156,7 +167,10 @@ server.setRequestHandler(ListResourcesRequestSchema, async () => {
 server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
   const { uri } = request.params;
   
-  return await projectResource.read(uri);
+  const result = await projectResource.read(uri);
+  return {
+    contents: result.contents
+  };
 });
 
 // Start the server

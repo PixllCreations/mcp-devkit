@@ -99,7 +99,7 @@ class InitTool {
     }
   }
 
-  private createDevelopmentPlan(projectType: string, requirements: string) {
+  private createDevelopmentPlan(projectType: string, _requirements: string) {
     switch (projectType) {
       case 'saas':
       case 'web-app':

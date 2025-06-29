@@ -65,7 +65,7 @@ try {
   console.error('\n' + chalk.red('✖ Unexpected error:'));
   console.error(chalk.gray('  '), error instanceof Error ? error.message : String(error));
   
-  if (program.opts().verbose && error instanceof Error && error.stack) {
+  if (program.opts()['verbose'] && error instanceof Error && error.stack) {
     console.error(chalk.dim('\nStack trace:'));
     console.error(chalk.dim(error.stack));
   }

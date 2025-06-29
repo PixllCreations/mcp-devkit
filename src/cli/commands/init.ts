@@ -11,7 +11,7 @@ export const initCommand = new Command('init')
   .argument('[directory]', 'Target directory for the project', '.')
   .option('--force', 'Overwrite existing .mcp directory if it exists')
   .option('--template <type>', 'Project template type', 'default')
-  .action(async (directory: string, options: { force?: boolean; template?: string }) => {
+  .action(async (directory: string, options: { force?: boolean; template?: string; verbose?: boolean }) => {
     const logger = new Logger(options.verbose || false);
     
     try {

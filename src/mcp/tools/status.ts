@@ -174,15 +174,20 @@ class StatusTool {
     const totalTasks = completedTasks.length + (currentTask ? 1 : 0) + nextSteps.length;
     const progressPercentage = totalTasks > 0 ? Math.round((completedTasks.length / totalTasks) * 100) : 0;
 
-    return {
+    const result: StatusResult = {
       currentPhase: metadata.phase || 'planning',
       progress: `${progressPercentage}%`,
       completedTasks,
-      currentTask,
       nextSteps,
       blockers: [], // TODO: implement blocker detection
       estimatedTimeToPhaseCompletion: this.estimateTimeToCompletion(nextSteps.length)
     };
+    
+    if (currentTask) {
+      result.currentTask = currentTask;
+    }
+    
+    return result;
   }
 
   private async identifyNextTask(mcpPath: string): Promise<any> {
@@ -274,14 +279,19 @@ class StatusTool {
       suggestedAction = 'Continue with current focus';
     }
 
-    return {
+    const result: DriftCheckResult = {
       isDrifting,
-      driftType: isDrifting ? driftType : undefined,
       originalPlan: 'Focus on systematic implementation according to development plan',
       currentFocus: currentDiscussion,
       recommendation,
       suggestedAction
     };
+    
+    if (isDrifting && driftType) {
+      result.driftType = driftType;
+    }
+    
+    return result;
   }
 
   private estimateTimeToCompletion(remainingTasks: number): string {
