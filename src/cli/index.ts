@@ -4,6 +4,7 @@ import { Command } from 'commander';
 import chalk from 'chalk';
 import { initCommand } from './commands/init.js';
 import { createValidateCommand } from './commands/validate.js';
+import { createEnhanceCommand } from './commands/enhance.js';
 
 const program = new Command();
 
@@ -34,7 +35,9 @@ program
     chalk.gray('  # Check project status\n') +
     '  $ mcp-devkit status\n\n' +
     chalk.gray('  # Validate project files\n') +
-    '  $ mcp-devkit validate\n');
+    '  $ mcp-devkit validate\n\n' +
+    chalk.gray('  # Enhance documents with AI\n') +
+    '  $ mcp-devkit enhance README.md --agent gpt4 --role architect\n');
 
 // Global error handler
 program.exitOverride((err) => {
@@ -50,15 +53,17 @@ program.exitOverride((err) => {
 // Add commands
 program.addCommand(initCommand);
 program.addCommand(createValidateCommand());
+program.addCommand(createEnhanceCommand());
 
 // Handle unknown commands
 program.on('command:*', () => {
   console.error('\n' + chalk.red('✖ Unknown command:'), chalk.yellow(program.args.join(' ')));
   console.error('\nAvailable commands:');
-  console.error(chalk.gray('  init [directory]  ') + 'Initialize a new mcp-devkit project');
-  console.error(chalk.gray('  serve             ') + 'Start MCP server for Claude Desktop');
-  console.error(chalk.gray('  status            ') + 'Check project status');
-  console.error(chalk.gray('  validate [path]   ') + 'Validate project files');
+  console.error(chalk.gray('  init [directory]    ') + 'Initialize a new mcp-devkit project');
+  console.error(chalk.gray('  serve               ') + 'Start MCP server for Claude Desktop');
+  console.error(chalk.gray('  status              ') + 'Check project status');
+  console.error(chalk.gray('  validate [path]     ') + 'Validate project files');
+  console.error(chalk.gray('  enhance <file>      ') + 'Enhance documents with AI agents');
   console.error('\nRun ' + chalk.cyan('mcp-devkit --help') + ' for more information.\n');
   process.exit(1);
 });

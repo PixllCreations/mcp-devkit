@@ -1,0 +1,10 @@
+{
+  "agents": {
+    "mock": {
+      "type": "mock",
+      "name": "mock",
+      "delay": 1000
+    }
+  },
+  "defaultAgent": "mock"
+}

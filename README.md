@@ -191,7 +191,7 @@ Claude: "Let me analyze this stalled project..."
 
 ## 🛠️ Features
 
-### ✅ Project Validation System (New!)
+### ✅ Project Validation System
 Ensure your project documentation stays high-quality with our comprehensive validation system:
 
 ```bash
@@ -211,13 +211,44 @@ mcp-devkit validate --format markdown > validation-report.md
 - 🏗️ **Document Structure**: Required sections, heading hierarchy
 - 📊 **JSON Schemas**: Configuration file validation
 
+### ✨ AI Agent Enhancement System (New!)
+Transform your documents with intelligent AI agents:
+
+```bash
+# Enhance documents with AI agents
+mcp-devkit enhance README.md --agent openai --role architect
+
+# Preview changes without applying
+mcp-devkit enhance doc.md --dry-run --cost-estimate
+
+# See detailed diff of changes
+mcp-devkit enhance file.md --format diff
+```
+
+**Agent Types:**
+- 🤖 **OpenAI**: GPT-4o, GPT-4o-mini with real API integration
+- 🔧 **Shell**: Execute local commands for enhancement
+- 🎭 **Mock**: Testing and demos without API keys
+
+**Built-in Roles:**
+- 🏗️ **Architect**: High-level system design and architecture
+- 👀 **Reviewer**: Code review and quality assessment  
+- ⚡ **Optimizer**: Performance and efficiency improvements
+- 📋 **Planner**: Project planning and task breakdown
+
+**Features:**
+- 💰 Cost estimation before enhancement
+- 📊 Token usage tracking and analysis
+- 🔄 Change tracking with confidence scores
+- ⚙️ Configurable via `.mcp/agents.json`
+
 ## 🛣️ Roadmap
 
-- ✅ **Phase 0**: Core MCP server with basic tools
-- ✅ **Phase 1**: Validation system and project quality tools
-- 🔄 **Phase 2**: Agent system for AI-powered enhancements
-- 📋 **Phase 3**: Team collaboration and handoff features
-- 🎯 **Phase 4**: Integration ecosystem (RepoPrompt, Serena, VS Code)
+- ✅ **Sprint 1**: Foundation & Setup - Core MCP server with basic tools
+- ✅ **Sprint 2**: Validation System - Project quality and validation tools  
+- ✅ **Sprint 3**: Agent System - AI-powered document enhancement
+- 🔄 **Sprint 4**: Polish & Deploy - Multi-agent orchestration and integrations
+- 📋 **Future**: Team collaboration and handoff features
 
 ## 🤝 Contributing
 
