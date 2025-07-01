@@ -34,3 +34,5 @@ export class Logger {
     console.log(chalk.green('[SUCCESS]'), message, ...args);
   }
 }
+
+export const logger = new Logger();

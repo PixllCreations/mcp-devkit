@@ -3,6 +3,7 @@
 import { Command } from 'commander';
 import chalk from 'chalk';
 import { initCommand } from './commands/init.js';
+import { createValidateCommand } from './commands/validate.js';
 
 const program = new Command();
 
@@ -31,7 +32,9 @@ program
     chalk.gray('  # Start MCP server for Claude Desktop\n') +
     '  $ mcp-devkit serve\n\n' +
     chalk.gray('  # Check project status\n') +
-    '  $ mcp-devkit status\n');
+    '  $ mcp-devkit status\n\n' +
+    chalk.gray('  # Validate project files\n') +
+    '  $ mcp-devkit validate\n');
 
 // Global error handler
 program.exitOverride((err) => {
@@ -46,6 +49,7 @@ program.exitOverride((err) => {
 
 // Add commands
 program.addCommand(initCommand);
+program.addCommand(createValidateCommand());
 
 // Handle unknown commands
 program.on('command:*', () => {
@@ -54,6 +58,7 @@ program.on('command:*', () => {
   console.error(chalk.gray('  init [directory]  ') + 'Initialize a new mcp-devkit project');
   console.error(chalk.gray('  serve             ') + 'Start MCP server for Claude Desktop');
   console.error(chalk.gray('  status            ') + 'Check project status');
+  console.error(chalk.gray('  validate [path]   ') + 'Validate project files');
   console.error('\nRun ' + chalk.cyan('mcp-devkit --help') + ' for more information.\n');
   process.exit(1);
 });

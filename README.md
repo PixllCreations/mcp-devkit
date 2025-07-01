@@ -189,12 +189,35 @@ Claude: "Let me analyze this stalled project..."
 - ✅ **Knowledge Preservation**: Project memory survives team changes
 - ✅ **Onboarding**: New developers can immediately understand project state
 
+## 🛠️ Features
+
+### ✅ Project Validation System (New!)
+Ensure your project documentation stays high-quality with our comprehensive validation system:
+
+```bash
+# Validate all project files
+mcp-devkit validate
+
+# Validate with strict mode (fail on warnings)
+mcp-devkit validate --strict
+
+# Generate markdown report
+mcp-devkit validate --format markdown > validation-report.md
+```
+
+**Validation Checks:**
+- 📝 **Markdown Quality**: Empty sections, placeholder text, broken links
+- ✓ **Task Lists**: Checkbox format validation
+- 🏗️ **Document Structure**: Required sections, heading hierarchy
+- 📊 **JSON Schemas**: Configuration file validation
+
 ## 🛣️ Roadmap
 
 - ✅ **Phase 0**: Core MCP server with basic tools
-- 🔄 **Phase 1**: Advanced project analytics and custom templates
-- 📋 **Phase 2**: Team collaboration and handoff features
-- 🎯 **Phase 3**: Integration ecosystem (RepoPrompt, Serena, VS Code)
+- ✅ **Phase 1**: Validation system and project quality tools
+- 🔄 **Phase 2**: Agent system for AI-powered enhancements
+- 📋 **Phase 3**: Team collaboration and handoff features
+- 🎯 **Phase 4**: Integration ecosystem (RepoPrompt, Serena, VS Code)
 
 ## 🤝 Contributing
 
