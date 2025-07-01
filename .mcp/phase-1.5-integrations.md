@@ -7,13 +7,13 @@
 ## 🎯 Integration Sprint (Days 16-18)
 
 ### Day 16: Fork Analysis & Extraction
-- [ ] **TASK-039**: Deep analysis of claude-code-requirements-builder (4h)
+- [ ] **TASK-040**: Deep analysis of claude-code-requirements-builder (4h)
   - Clone and study the repository structure
   - Identify reusable command patterns
   - Document their state management approach
   - Extract useful template structures
 
-- [ ] **TASK-040**: Extract command system architecture (2h)
+- [ ] **TASK-041**: Extract command system architecture (2h)
   ```typescript
   // src/core/commands/
   - Adapt their slash command system
@@ -23,7 +23,7 @@
   ```
 
 ### Day 17: RepoPrompt & Context Generation
-- [ ] **TASK-041**: Implement RepoPrompt integration (4h)
+- [ ] **TASK-042**: Implement RepoPrompt integration (4h)
   ```typescript
   // src/integrations/repoprompt.ts
   export class RepoPromptIntegration {
@@ -33,14 +33,14 @@
   }
   ```
 
-- [ ] **TASK-042**: Create context generation system (2h)
+- [ ] **TASK-043**: Create context generation system (2h)
   - Auto-generate repo context from .mcp/ files
   - Create agent-specific context summaries
   - Export to repoprompt.json format
   - Update on file changes (file watcher)
 
 ### Day 18: Enhanced MCP Server for Claude Workflow
-- [ ] **TASK-043**: Implement Claude workflow enhancement tools (4h)
+- [ ] **TASK-044**: Implement Claude workflow enhancement tools (4h)
   ```typescript
   // Core MCP tools for Claude development workflow
   const claudeWorkflowTools = {
@@ -53,7 +53,7 @@
   };
   ```
 
-- [ ] **TASK-043b**: Implement project state persistence (2h)
+- [ ] **TASK-045**: Implement project state persistence (2h)
   - Persistent project memory across Claude sessions
   - Development state tracking and recovery
   - Multi-session context management
@@ -71,7 +71,7 @@
       tools: [analyze_risk, suggest_improvements]
   ```
 
-- [ ] **TASK-044**: Create workflow orchestration (2h)
+- [ ] **TASK-046**: Create workflow orchestration (2h)
   - Map mcp-devkit phases to Serena workflows
   - Create playbook templates for common scenarios
   - Add tool interface adapters

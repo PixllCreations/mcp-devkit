@@ -59,8 +59,8 @@ mcp_technical_review()   // Get expert technical consultation
 **Implementation Phase**: 🔄 **IN PROGRESS**
 - ✅ **Sprint 1**: Foundation & Setup (26 story points, 5 days) - **COMPLETE**
 - ✅ **Sprint 2**: Validation System (26 story points, 5 days) - **COMPLETE**
-- ⏳ **Sprint 3**: Agent System & Integrations - **NEXT UP**
-- ⏳ **Sprint 4**: Polish & Deploy
+- ✅ **Sprint 3**: Agent System (29 story points, 5 days) - **COMPLETE**
+- ⏳ **Sprint 4**: Polish & Deploy - **NEXT UP**
 
 ## Project Structure (Current)
 ```
@@ -70,17 +70,26 @@ mcp_technical_review()   // Get expert technical consultation
 │   │   ├── index.ts                       # Main CLI entry point
 │   │   └── commands/                      # CLI commands
 │   │       ├── init.ts                    # Project initialization
-│   │       └── validate.ts                # ✨ NEW: Validation command
+│   │       ├── validate.ts                # ✅ Validation command
+│   │       └── enhance.ts                 # ✨ NEW: Document enhancement
 │   ├── core/                              # Core business logic
 │   │   ├── templates/                     # Template system
-│   │   └── validators/                    # ✨ NEW: Validation system
-│   │       ├── types.ts                   # Validator interfaces
-│   │       ├── base.ts                    # Base validator class
-│   │       ├── registry.ts                # Plugin registry
-│   │       ├── validator.ts               # Main validator
-│   │       ├── markdown-validator.ts      # Markdown rules
-│   │       ├── schema-validator.ts        # JSON schema validation
-│   │       └── builtin-plugin.ts          # Built-in validators
+│   │   ├── validators/                    # ✅ Validation system
+│   │   │   ├── types.ts                   # Validator interfaces
+│   │   │   ├── base.ts                    # Base validator class
+│   │   │   ├── registry.ts                # Plugin registry
+│   │   │   ├── validator.ts               # Main validator
+│   │   │   ├── markdown-validator.ts      # Markdown rules
+│   │   │   ├── schema-validator.ts        # JSON schema validation
+│   │   │   └── builtin-plugin.ts          # Built-in validators
+│   │   └── agents/                        # ✨ NEW: Agent system
+│   │       ├── types.ts                   # Agent interfaces & enums
+│   │       ├── base.ts                    # Base agent class
+│   │       ├── registry.ts                # Agent registry
+│   │       ├── config.ts                  # Configuration management
+│   │       ├── mock-agent.ts              # Mock agent for testing
+│   │       ├── shell-agent.ts             # Shell command agent
+│   │       └── openai-agent.ts            # OpenAI API agent
 │   ├── mcp/                               # MCP server implementation
 │   │   ├── server.ts                      # MCP server
 │   │   └── tools.ts                       # MCP tool definitions
@@ -90,9 +99,10 @@ mcp_technical_review()   // Get expert technical consultation
 │   └── validators/                        # ✨ NEW: Validator tests
 ├── .mcp/                                  # Planning documents
 │   ├── phase-0-tasks.md                  # Sprint 1: Foundation ✅
-│   ├── phase-1-tasks.md                  # Sprint 2: Core Features ✅
-│   ├── phase-1.5-integrations.md         # Sprint 3: Tool Integrations
-│   └── phase-2-tasks.md                  # Sprint 4: Polish & Deploy
+│   ├── phase-1-tasks.md                  # Sprint 2-3: Core Features ✅
+│   ├── phase-1.5-integrations.md         # Sprint 3: Tool Integrations ✅
+│   ├── phase-2-tasks.md                  # Sprint 4: Polish & Deploy
+│   └── agents.json                       # ✨ NEW: Agent configuration
 ├── dist/                                  # Built JavaScript files
 ├── coverage/                              # Test coverage reports
 ├── .github/                               # CI/CD workflows
@@ -109,6 +119,7 @@ mcp_technical_review()   // Get expert technical consultation
 - **Commander.js** for CLI interface 
 - **@modelcontextprotocol/sdk** for MCP server implementation
 - **AJV** for JSON schema validation
+- **OpenAI SDK** for AI agent integration
 - **Vitest** for testing framework
 
 ### Architecture Approach
@@ -119,18 +130,20 @@ mcp_technical_review()   // Get expert technical consultation
 
 ## Critical Next Steps
 
-### Sprint 3: Agent System & Integrations (Starting Now)
-1. **TASK-028**: Design pluggable agent interface
-2. **TASK-029**: Create agent registry system
-3. **TASK-030**: Implement mock agent for testing
-4. **TASK-032**: Implement OpenAI agent
-5. **TASK-034**: Create enhance command
-See `.mcp/phase-1-tasks.md` for complete Sprint 3 breakdown.
+### Sprint 4: Polish & Deploy (Next Up)
+1. **TASK-036**: Create cycle command for multi-agent orchestration
+2. **TASK-037**: Add caching system for agent responses
+3. **TASK-038**: Implement RepoPrompt integration
+4. **TASK-039**: Implement Serena integration hooks
+5. **TASK-040**: Complete MCP server tools
+See `.mcp/phase-2-tasks.md` for complete Sprint 4 breakdown.
 
 ### Recent Achievements
 - ✅ **Sprint 1**: All 17 tasks completed - foundation, CLI, MCP server
 - ✅ **Sprint 2**: 8/10 tasks completed - validation system fully operational
+- ✅ **Sprint 3**: All 8 tasks completed - complete agent system operational
 - ✨ **NEW**: `mcp validate` command finds issues in project files
+- ✨ **NEW**: `mcp enhance` command with 3 agent types and 4 roles
 
 ## Development Principles
 
@@ -149,6 +162,31 @@ When implementing mcp-devkit:
 
 When resuming work on mcp-devkit:
 1. **Always check** `.mcp/user-tasks.md` for required user actions first
-2. **Reference** `.mcp/phase-0-tasks.md` for current sprint tasks
+2. **Reference** `.mcp/phase-2-tasks.md` for current sprint tasks (Sprint 4)
 3. **Use TodoWrite/TodoRead** tools to track implementation progress
 4. **Follow** the systematic approach demonstrated in planning phase
+
+## Available Commands
+
+### CLI Commands
+```bash
+# Initialize new project
+mcp-devkit init my-project
+
+# Validate project files  
+mcp-devkit validate [path] --strict --format json
+
+# Enhance documents with AI agents
+mcp-devkit enhance README.md --agent openai --role architect
+mcp-devkit enhance doc.md --dry-run --cost-estimate
+mcp-devkit enhance file.md --format diff --output enhanced.md
+
+# Start MCP server (coming in Sprint 4)
+mcp-devkit serve
+```
+
+### Agent System
+- **3 Agent Types**: Mock (testing), Shell (local commands), OpenAI (GPT models)
+- **4 Built-in Roles**: architect, reviewer, optimizer, planner
+- **Configuration**: `.mcp/agents.json` with environment variable support
+- **Features**: Cost estimation, token tracking, change analysis
