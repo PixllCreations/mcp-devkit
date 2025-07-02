@@ -110,16 +110,16 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
   switch (name) {
     case 'mcp_init_guided':
-      return await initTool.execute(args);
+      return await initTool.execute(args || {});
     
     case 'mcp_get_status':
-      return await statusTool.execute(args);
+      return await statusTool.execute(args || {});
     
     case 'mcp_next_task':
-      return await statusTool.getNextTask(args);
+      return await statusTool.getNextTask(args || {});
     
     case 'mcp_check_drift':
-      return await statusTool.checkDrift(args);
+      return await statusTool.checkDrift(args || {});
     
     default:
       throw new Error(`Unknown tool: ${name}`);
@@ -156,7 +156,10 @@ server.setRequestHandler(ListResourcesRequestSchema, async () => {
 server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
   const { uri } = request.params;
   
-  return await projectResource.read(uri);
+  const result = await projectResource.read(uri);
+  return {
+    contents: result.contents
+  };
 });
 
 // Start the server

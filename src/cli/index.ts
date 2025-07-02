@@ -3,6 +3,7 @@
 import { Command } from 'commander';
 import chalk from 'chalk';
 import { initCommand } from './commands/init.js';
+import { createDemoCommand } from './commands/demo.js';
 
 const program = new Command();
 
@@ -28,6 +29,8 @@ program
   .addHelpText('after', '\n' + chalk.bold('Examples:') + '\n' +
     chalk.gray('  # Initialize a new project\n') +
     '  $ mcp-devkit init my-project\n\n' +
+    chalk.gray('  # Run interactive demo\n') +
+    '  $ mcp-devkit demo\n\n' +
     chalk.gray('  # Start MCP server for Claude Desktop\n') +
     '  $ mcp-devkit serve\n\n' +
     chalk.gray('  # Check project status\n') +
@@ -46,12 +49,14 @@ program.exitOverride((err) => {
 
 // Add commands
 program.addCommand(initCommand);
+program.addCommand(createDemoCommand());
 
 // Handle unknown commands
 program.on('command:*', () => {
   console.error('\n' + chalk.red('✖ Unknown command:'), chalk.yellow(program.args.join(' ')));
   console.error('\nAvailable commands:');
   console.error(chalk.gray('  init [directory]  ') + 'Initialize a new mcp-devkit project');
+  console.error(chalk.gray('  demo              ') + 'Run interactive demonstration');
   console.error(chalk.gray('  serve             ') + 'Start MCP server for Claude Desktop');
   console.error(chalk.gray('  status            ') + 'Check project status');
   console.error('\nRun ' + chalk.cyan('mcp-devkit --help') + ' for more information.\n');
@@ -65,7 +70,7 @@ try {
   console.error('\n' + chalk.red('✖ Unexpected error:'));
   console.error(chalk.gray('  '), error instanceof Error ? error.message : String(error));
   
-  if (program.opts().verbose && error instanceof Error && error.stack) {
+  if (program.opts()['verbose'] && error instanceof Error && error.stack) {
     console.error(chalk.dim('\nStack trace:'));
     console.error(chalk.dim(error.stack));
   }

@@ -12,7 +12,7 @@ export const initCommand = new Command('init')
   .option('--force', 'Overwrite existing .mcp directory if it exists')
   .option('--template <type>', 'Project template type', 'default')
   .action(async (directory: string, options: { force?: boolean; template?: string }) => {
-    const logger = new Logger(options.verbose || false);
+    const logger = new Logger(false);
     
     try {
       await initializeProject(directory, options, logger);

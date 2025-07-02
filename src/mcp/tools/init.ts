@@ -4,7 +4,7 @@ import { TemplateManager } from '../../core/templates/manager.js';
 import { Logger } from '../../utils/logger.js';
 
 export interface InitToolArgs {
-  projectPath: string;
+  projectPath?: string;
   projectType?: string;
   requirements?: string;
 }
@@ -30,7 +30,7 @@ export interface InitToolResult {
 class InitTool {
   async execute(args: InitToolArgs): Promise<{ content: Array<{ type: string; text: string }> }> {
     try {
-      const { projectPath, projectType = 'web-app', requirements = '' } = args;
+      const { projectPath = process.cwd(), projectType = 'web-app', requirements = '' } = args;
       
       const targetPath = path.resolve(projectPath);
       const mcpPath = path.join(targetPath, '.mcp');
@@ -99,7 +99,7 @@ class InitTool {
     }
   }
 
-  private createDevelopmentPlan(projectType: string, requirements: string) {
+  private createDevelopmentPlan(projectType: string, _requirements: string) {
     switch (projectType) {
       case 'saas':
       case 'web-app':
@@ -188,7 +188,7 @@ class InitTool {
     }
   }
 
-  private async updatePRDWithRequirements(mcpPath: string, requirements: string, projectType: string): Promise<void> {
+  private async updatePRDWithRequirements(mcpPath: string, _requirements: string, projectType: string): Promise<void> {
     const prdPath = path.join(mcpPath, 'context_prd.md');
     
     try {
@@ -197,13 +197,13 @@ class InitTool {
       // Replace the problem statement placeholder
       prdContent = prdContent.replace(
         'Describe the problem your project solves and why it matters.',
-        requirements
+        _requirements
       );
       
       // Add project type context
       prdContent = prdContent.replace(
         'Explain your approach to solving the problem.',
-        `Building a ${projectType} to address the requirements: ${requirements}`
+        `Building a ${projectType} to address the requirements: ${_requirements}`
       );
       
       await fs.writeFile(prdPath, prdContent);

@@ -20,7 +20,7 @@ export interface NextTaskArgs {
 }
 
 export interface DriftCheckArgs {
-  currentDiscussion: string;
+  currentDiscussion?: string;
   sessionLength?: number;
 }
 
@@ -178,7 +178,7 @@ class StatusTool {
       currentPhase: metadata.phase || 'planning',
       progress: `${progressPercentage}%`,
       completedTasks,
-      currentTask,
+      currentTask: currentTask || '',
       nextSteps,
       blockers: [], // TODO: implement blocker detection
       estimatedTimeToPhaseCompletion: this.estimateTimeToCompletion(nextSteps.length)
@@ -232,7 +232,7 @@ class StatusTool {
   }
 
   private async analyzeDrift(args: DriftCheckArgs): Promise<DriftCheckResult> {
-    const { currentDiscussion, sessionLength = 0 } = args;
+    const { currentDiscussion = '', sessionLength = 0 } = args;
     
     // Simple drift detection heuristics
     const driftKeywords = [
@@ -276,7 +276,7 @@ class StatusTool {
 
     return {
       isDrifting,
-      driftType: isDrifting ? driftType : undefined,
+      driftType: isDrifting ? driftType : 'none',
       originalPlan: 'Focus on systematic implementation according to development plan',
       currentFocus: currentDiscussion,
       recommendation,
