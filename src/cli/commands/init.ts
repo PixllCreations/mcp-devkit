@@ -6,6 +6,8 @@ import fs from 'fs/promises';
 import { createInterface } from 'readline';
 import { TemplateManager } from '../../core/templates/manager.js';
 import { Logger } from '../../utils/logger.js';
+import { AIProjectOrchestrator } from '../../core/ai-planning/orchestrator.js';
+import { ProjectInput } from '../../core/ai-planning/types.js';
 
 export const initCommand = new Command('init')
   .description('Initialize a new mcp-devkit project')
@@ -157,115 +159,154 @@ async function interactiveDocumentSetup(mcpPath: string): Promise<void> {
   };
 
   try {
-    // 1. Project Requirements Document (PRD)
-    console.log(chalk.bold('📋 Project Requirements Document (PRD)'));
-    console.log(chalk.gray('Define what your project does and why it matters.\n'));
+    // Gather project information
+    console.log(chalk.bold('📋 Let\'s understand your project'));
+    console.log(chalk.gray('I\'ll ask you a few questions to help AI create the perfect plan.\n'));
 
     const projectName = await question(chalk.cyan('What is your project name? '));
-    const problemStatement = await question(chalk.cyan('What problem does your project solve? '));
-    const targetAudience = await question(chalk.cyan('Who is your target audience? '));
-    const keyFeatures = await question(chalk.cyan('What are the key features? (comma-separated) '));
-    const projectType = await question(chalk.cyan('What type of project is this? (web-app/api/cli/mobile/other) ')) || 'web-app';
+    const description = await question(chalk.cyan('Describe your project in one sentence: '));
+    
+    console.log(chalk.gray('\nWhat are your main goals? (press Enter after each, empty line to finish)'));
+    const goals: string[] = [];
+    let goal: string;
+    do {
+      goal = await question(chalk.cyan(`Goal ${goals.length + 1}: `));
+      if (goal.trim()) goals.push(goal.trim());
+    } while (goal.trim() && goals.length < 5);
 
-    // Update PRD file
-    await updatePRD(mcpPath, {
-      projectName,
-      problemStatement,
-      targetAudience,
-      keyFeatures: keyFeatures.split(',').map(f => f.trim()).filter(f => f),
-      projectType
-    });
+    console.log(chalk.gray('\nAny constraints or requirements? (press Enter after each, empty line to finish)'));
+    const constraints: string[] = [];
+    let constraint: string;
+    do {
+      constraint = await question(chalk.cyan(`Constraint ${constraints.length + 1}: `));
+      if (constraint.trim()) constraints.push(constraint.trim());
+    } while (constraint.trim() && constraints.length < 5);
 
-    console.log(chalk.green('✓ Requirements document updated!\n'));
-
-    // 2. Architecture Document
-    console.log(chalk.bold('🏗️ System Architecture'));
-    console.log(chalk.gray('Define your technical approach and system design.\n'));
-
-    const techStack = await question(chalk.cyan('What technologies will you use? (e.g., React, Node.js, PostgreSQL) '));
-    const architecture = await question(chalk.cyan('Describe your system architecture: '));
-    const databaseChoice = await question(chalk.cyan('What database will you use? (if any) ')) || 'None';
-    const deployment = await question(chalk.cyan('Where will you deploy this? (e.g., Vercel, AWS, local) '));
-
-    // Update Architecture file
-    await updateArchitecture(mcpPath, {
-      techStack,
-      architecture,
-      databaseChoice,
-      deployment
-    });
-
-    console.log(chalk.green('✓ Architecture document updated!\n'));
-
-    // 3. Task List
-    console.log(chalk.bold('📝 Development Tasks'));
-    console.log(chalk.gray('Break down your project into manageable tasks.\n'));
-
-    const phases: string[] = [];
-    let addMorePhases = true;
-    let phaseNumber = 1;
-
-    while (addMorePhases && phaseNumber <= 5) {
-      const phaseName = await question(chalk.cyan(`Phase ${phaseNumber} name (or press Enter to finish): `));
-      if (!phaseName.trim()) {
-        addMorePhases = false;
-        break;
-      }
-
-      const phaseTasks = await question(chalk.cyan(`Tasks for ${phaseName} (comma-separated): `));
-      phases.push(`**${phaseName}**\n${phaseTasks.split(',').map(t => `- ${t.trim()}`).join('\n')}`);
-      
-      phaseNumber++;
+    const projectType = await question(chalk.cyan('\nProject type (web-app/api/cli/mobile/saas): ')) || 'web-app';
+    const experienceLevel = await question(chalk.cyan('Your experience level (beginner/intermediate/advanced): ')) || 'intermediate';
+    const timeline = await question(chalk.cyan('Desired timeline (e.g., 2 weeks, 3 months): ')) || '3 months';
+    
+    // Check for API keys
+    const hasOpenAI = !!process.env['OPENAI_API_KEY'];
+    const hasAnthropic = !!process.env['ANTHROPIC_API_KEY'];
+    const hasGoogle = !!process.env['GOOGLE_AI_API_KEY'];
+    
+    if (!hasOpenAI && !hasAnthropic && !hasGoogle) {
+      console.log(chalk.yellow('\n⚠️  No AI API keys detected'));
+      console.log(chalk.gray('Set environment variables for better results:'));
+      console.log(chalk.gray('  • OPENAI_API_KEY - For GPT-4 architecture design'));
+      console.log(chalk.gray('  • ANTHROPIC_API_KEY - For Claude requirements analysis'));
+      console.log(chalk.gray('  • GOOGLE_AI_API_KEY - For Gemini project planning'));
+      console.log(chalk.gray('\nUsing intelligent fallback planning...\n'));
+    } else {
+      console.log(chalk.green('\n✓ AI providers configured:'));
+      if (hasOpenAI) console.log(chalk.gray('  • OpenAI GPT-4'));
+      if (hasAnthropic) console.log(chalk.gray('  • Anthropic Claude'));
+      if (hasGoogle) console.log(chalk.gray('  • Google Gemini'));
     }
 
-    // Update Task List file
-    await updateTaskList(mcpPath, { phases, projectType });
-
-    console.log(chalk.green('✓ Task list document updated!\n'));
-
-    // Final summary
-    console.log(chalk.bold.green('🎉 Interactive setup complete!'));
-    console.log(chalk.gray('Your project documents have been customized with your responses.'));
-    console.log(chalk.gray('You can always edit the files in .mcp/ directory manually.\n'));
-
-  } finally {
     rl.close();
+
+    // Create project input
+    const projectInput: ProjectInput = {
+      name: projectName,
+      description,
+      goals,
+      constraints: constraints.length > 0 ? constraints : ['Budget-conscious', 'Time-efficient', 'Maintainable'],
+      preferences: {
+        projectType,
+        experienceLevel,
+        timeline
+      }
+    };
+
+    // Use AI orchestrator to analyze and plan
+    const orchestrator = new AIProjectOrchestrator();
+    const analysis = await orchestrator.analyzeProject(projectInput);
+
+    // Update all documents with AI-generated content
+    await updateProjectDocuments(mcpPath, projectInput, analysis);
+
+    // Display summary
+    console.log(chalk.bold.green('\n🎉 AI-Powered Project Setup Complete!'));
+    console.log(chalk.gray('Your project has been analyzed by multiple AI models:\n'));
+    
+    console.log(chalk.bold('📋 Requirements (Claude):'));
+    console.log(chalk.gray(`  • Problem: ${analysis.requirements.problemStatement.substring(0, 80)}...`));
+    console.log(chalk.gray(`  • Audience: ${analysis.requirements.targetAudience}`));
+    console.log(chalk.gray(`  • ${analysis.requirements.keyFeatures.length} key features defined`));
+    
+    console.log(chalk.bold('\n🏗️ Architecture (GPT-4):'));
+    const techItems = Object.entries(analysis.architecture.techStack)
+      .filter(([_, techs]) => techs && techs.length > 0)
+      .map(([key, techs]) => `${key}: ${techs!.join(', ')}`);
+    techItems.forEach(item => console.log(chalk.gray(`  • ${item}`)));
+    
+    console.log(chalk.bold('\n📅 Project Plan (Gemini):'));
+    console.log(chalk.gray(`  • ${analysis.plan.phases.length} development phases`));
+    console.log(chalk.gray(`  • ${analysis.plan.phases.reduce((sum, p) => sum + p.tasks.length, 0)} total tasks`));
+    console.log(chalk.gray(`  • ${analysis.plan.milestones.length} milestones identified`));
+    
+    console.log(chalk.dim('\n💡 Next: Review the generated documents in .mcp/ and start developing!'));
+
+  } catch (error) {
+    rl.close();
+    throw error;
   }
 }
 
-async function updatePRD(mcpPath: string, data: {
-  projectName: string;
-  problemStatement: string;
-  targetAudience: string;
-  keyFeatures: string[];
-  projectType: string;
-}): Promise<void> {
+async function updateProjectDocuments(
+  mcpPath: string, 
+  input: ProjectInput,
+  analysis: Awaited<ReturnType<AIProjectOrchestrator['analyzeProject']>>
+): Promise<void> {
+  // Update PRD
+  await updatePRDWithAI(mcpPath, input, analysis.requirements);
+  
+  // Update Architecture
+  await updateArchitectureWithAI(mcpPath, analysis.architecture);
+  
+  // Update Task List
+  await updateTaskListWithAI(mcpPath, input, analysis.plan);
+  
+  // Create metadata with AI analysis results
+  await createProjectMetadata(mcpPath, input, analysis);
+}
+
+async function updatePRDWithAI(
+  mcpPath: string, 
+  input: ProjectInput,
+  requirements: Awaited<ReturnType<AIProjectOrchestrator['analyzeProject']>>['requirements']
+): Promise<void> {
   const prdPath = path.join(mcpPath, 'context_prd.md');
   
   try {
     let prdContent = await fs.readFile(prdPath, 'utf-8');
     
-    // Replace placeholders with actual content
+    // Replace placeholders with AI-generated content
     prdContent = prdContent.replace(
       /# Project Requirements Document.*?\n\n/s,
-      `# ${data.projectName} - Project Requirements Document\n\n`
+      `# ${input.name} - Project Requirements Document\n\n`
     );
     
     prdContent = prdContent.replace(
       'Describe the problem your project solves and why it matters.',
-      data.problemStatement
+      requirements.problemStatement
     );
     
     prdContent = prdContent.replace(
       'Define who will use your project and what they need.',
-      data.targetAudience
+      requirements.targetAudience
     );
     
-    // Add key features section
-    const featuresSection = `## Key Features\n\n${data.keyFeatures.map(f => `- ${f}`).join('\n')}\n\n## Project Type\n\n${data.projectType}\n\n`;
+    // Add comprehensive sections
+    const featuresSection = `## Key Features\n\n${requirements.keyFeatures.map(f => `- ${f}`).join('\n')}\n\n`;
+    const metricsSection = `## Success Metrics\n\n${requirements.successMetrics.map(m => `- ${m}`).join('\n')}\n\n`;
+    const scopeSection = `## Out of Scope\n\n${requirements.outOfScope.map(s => `- ${s}`).join('\n')}\n\n`;
+    
     prdContent = prdContent.replace(
       '## Solution Approach',
-      featuresSection + '## Solution Approach'
+      featuresSection + metricsSection + scopeSection + '## Solution Approach'
     );
     
     await fs.writeFile(prdPath, prdContent);
@@ -274,38 +315,45 @@ async function updatePRD(mcpPath: string, data: {
   }
 }
 
-async function updateArchitecture(mcpPath: string, data: {
-  techStack: string;
-  architecture: string;
-  databaseChoice: string;
-  deployment: string;
-}): Promise<void> {
+async function updateArchitectureWithAI(
+  mcpPath: string,
+  architecture: Awaited<ReturnType<AIProjectOrchestrator['analyzeProject']>>['architecture']
+): Promise<void> {
   const archPath = path.join(mcpPath, 'context_architecture.md');
   
   try {
     let archContent = await fs.readFile(archPath, 'utf-8');
     
-    // Replace technology stack section
-    archContent = archContent.replace(
-      /## Technology Stack[\s\S]*?(?=## |$)/,
-      `## Technology Stack\n\n${data.techStack}\n\n`
-    );
-    
     // Replace system overview
     archContent = archContent.replace(
       'Describe your overall system architecture and how components interact.',
-      data.architecture
+      architecture.overview
     );
     
-    // Add database and deployment sections
-    const infrastructureSection = `## Database\n\n${data.databaseChoice}\n\n## Deployment\n\n${data.deployment}\n\n`;
+    // Build technology stack section
+    const techStackContent = Object.entries(architecture.techStack)
+      .filter(([_, techs]) => techs && techs.length > 0)
+      .map(([category, techs]) => `### ${category.charAt(0).toUpperCase() + category.slice(1)}\n${techs!.map(t => `- ${t}`).join('\n')}`)
+      .join('\n\n');
     
-    if (!archContent.includes('## Database')) {
-      archContent = archContent.replace(
-        '## Implementation Notes',
-        infrastructureSection + '## Implementation Notes'
-      );
-    }
+    archContent = archContent.replace(
+      /## Technology Stack[\s\S]*?(?=## |$)/,
+      `## Technology Stack\n\n${techStackContent}\n\n`
+    );
+    
+    // Add components section
+    const componentsSection = `## System Components\n\n${architecture.components.map(c => 
+      `### ${c.name}\n**Purpose:** ${c.purpose}\n**Technologies:** ${c.technologies.join(', ')}\n`
+    ).join('\n')}\n`;
+    
+    // Add data flow and security sections
+    const dataFlowSection = `## Data Flow\n\n${architecture.dataFlow}\n\n`;
+    const securitySection = `## Security Considerations\n\n${architecture.securityConsiderations.map(s => `- ${s}`).join('\n')}\n\n`;
+    
+    archContent = archContent.replace(
+      '## Implementation Notes',
+      componentsSection + dataFlowSection + securitySection + '## Implementation Notes'
+    );
     
     await fs.writeFile(archPath, archContent);
   } catch (error) {
@@ -313,31 +361,92 @@ async function updateArchitecture(mcpPath: string, data: {
   }
 }
 
-async function updateTaskList(mcpPath: string, data: {
-  phases: string[];
-  projectType: string;
-}): Promise<void> {
+async function updateTaskListWithAI(
+  mcpPath: string,
+  input: ProjectInput,
+  plan: Awaited<ReturnType<AIProjectOrchestrator['analyzeProject']>>['plan']
+): Promise<void> {
   const taskPath = path.join(mcpPath, 'context_tasklist.md');
   
   try {
     let taskContent = await fs.readFile(taskPath, 'utf-8');
     
-    // Replace the development phases section
-    const phasesContent = `## Development Phases\n\n${data.phases.join('\n\n')}\n\n`;
+    // Replace title with project-specific title
+    taskContent = taskContent.replace(
+      '# Task List and Development Plan',
+      `# ${input.name} - Development Plan`
+    );
+    
+    // Generate comprehensive phases section
+    const phasesContent = plan.phases.map((phase, index) => {
+      const tasksContent = phase.tasks.map(task => 
+        `- **${task.title}** (${task.priority} priority, ~${task.estimatedHours}h)\n  ${task.description}${task.dependencies ? `\n  Dependencies: ${task.dependencies.join(', ')}` : ''}`
+      ).join('\n');
+      
+      return `## Phase ${index + 1}: ${phase.name}\n**Duration:** ${phase.duration}\n**Goals:** ${phase.goals.join(', ')}\n\n### Tasks:\n${tasksContent}`;
+    }).join('\n\n');
     
     taskContent = taskContent.replace(
       /## Development Phases[\s\S]*?(?=## |$)/,
-      phasesContent
+      `## Development Phases\n\n${phasesContent}\n\n`
     );
     
-    // Add project type context
+    // Add milestones section
+    const milestonesContent = `## Milestones\n\n${plan.milestones.map(m => 
+      `- **${m.name}**\n  Deliverables: ${m.deliverables.join(', ')}`
+    ).join('\n')}\n\n`;
+    
+    // Add risks section
+    const risksContent = `## Risk Assessment\n\n${plan.risks.map(r => 
+      `- **${r.description}** (${r.impact} impact)\n  Mitigation: ${r.mitigation}`
+    ).join('\n')}\n\n`;
+    
+    // Insert new sections before tracking
     taskContent = taskContent.replace(
-      '# Task List and Development Plan',
-      `# ${data.projectType.charAt(0).toUpperCase() + data.projectType.slice(1)} Development Plan`
+      '## Progress Tracking',
+      milestonesContent + risksContent + '## Progress Tracking'
     );
     
     await fs.writeFile(taskPath, taskContent);
   } catch (error) {
     console.error(chalk.yellow('Warning: Could not update Task List file:', error));
+  }
+}
+
+async function createProjectMetadata(
+  mcpPath: string,
+  input: ProjectInput,
+  analysis: Awaited<ReturnType<AIProjectOrchestrator['analyzeProject']>>
+): Promise<void> {
+  const metadataPath = path.join(mcpPath, 'metadata.json');
+  
+  const metadata = {
+    project: {
+      name: input.name,
+      description: input.description,
+      type: input.preferences.projectType,
+      created: new Date().toISOString()
+    },
+    analysis: {
+      timestamp: analysis.metadata.analyzedAt,
+      providers: analysis.metadata.providers,
+      summary: {
+        featuresCount: analysis.requirements.keyFeatures.length,
+        phasesCount: analysis.plan.phases.length,
+        totalTasks: analysis.plan.phases.reduce((sum, p) => sum + p.tasks.length, 0),
+        estimatedHours: analysis.plan.phases.reduce((sum, p) => 
+          sum + p.tasks.reduce((taskSum, t) => taskSum + t.estimatedHours, 0), 0
+        )
+      }
+    },
+    preferences: input.preferences,
+    phase: 'planning',
+    status: 'active'
+  };
+  
+  try {
+    await fs.writeFile(metadataPath, JSON.stringify(metadata, null, 2));
+  } catch (error) {
+    console.error(chalk.yellow('Warning: Could not create metadata file:', error));
   }
 }

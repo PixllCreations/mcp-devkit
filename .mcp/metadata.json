@@ -1,0 +1,23 @@
+{
+  "projectName": "mcp-devkit",
+  "templateType": "default",
+  "version": "0.1.0",
+  "created": "2025-07-02T02:15:25.215Z",
+  "lastModified": "2025-07-02T02:15:25.215Z",
+  "mcpDevkitVersion": "0.1.0",
+  "phase": "planning",
+  "agents": {
+    "claude": {
+      "enabled": true,
+      "role": "architect"
+    },
+    "gpt4": {
+      "enabled": false,
+      "role": "enhancer"
+    },
+    "gemini": {
+      "enabled": false,
+      "role": "reviewer"
+    }
+  }
+}
