@@ -40,6 +40,8 @@ program
   .addHelpText('after', '\n' + chalk.bold('Examples:') + '\n' +
     chalk.gray('  # Initialize a new project\n') +
     '  $ mcp-devkit init my-project\n\n' +
+    chalk.gray('  # Initialize with interactive document setup\n') +
+    '  $ mcp-devkit init --interactive my-project\n\n' +
     chalk.gray('  # Run interactive demo\n') +
     '  $ mcp-devkit demo\n\n' +
     chalk.gray('  # Start MCP server for Claude Desktop\n') +
