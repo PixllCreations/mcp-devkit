@@ -7,6 +7,7 @@ import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { initCommand } from './commands/init.js';
 import { createDemoCommand } from './commands/demo.js';
+import { createStatusCommand } from './commands/status.js';
 
 // Get version from package.json
 const __filename = fileURLToPath(import.meta.url);
@@ -59,6 +60,7 @@ program.exitOverride((err) => {
 // Add commands
 program.addCommand(initCommand);
 program.addCommand(createDemoCommand());
+program.addCommand(createStatusCommand());
 
 // Handle unknown commands
 program.on('command:*', () => {
