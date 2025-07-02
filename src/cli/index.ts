@@ -2,8 +2,17 @@
 
 import { Command } from 'commander';
 import chalk from 'chalk';
+import { readFileSync } from 'fs';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
 import { initCommand } from './commands/init.js';
 import { createDemoCommand } from './commands/demo.js';
+
+// Get version from package.json
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const packageJson = JSON.parse(readFileSync(join(__dirname, '../../package.json'), 'utf-8'));
+const version = packageJson.version;
 
 const program = new Command();
 
@@ -14,7 +23,7 @@ program
     '  An MCP server that prevents context drift and maintains project\n' +
     '  memory across all Claude development sessions.\n\n' +
     chalk.dim('  Learn more: https://github.com/escott/mcp-devkit'))
-  .version('0.1.0', '-v, --version', 'Display version number')
+  .version(version, '-v, --version', 'Display version number')
   .option('--verbose', 'Enable verbose logging')
   .option('--quiet', 'Suppress non-essential output')
   .helpOption('-h, --help', 'Display help for command')
@@ -38,7 +47,7 @@ program
 
 // Global error handler
 program.exitOverride((err) => {
-  if (err.code === 'commander.help') {
+  if (err.code === 'commander.help' || err.code === 'commander.version' || err.message === '(outputHelp)') {
     process.exit(0);
   }
   
